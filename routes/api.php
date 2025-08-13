@@ -22,7 +22,7 @@ Route::get('orders/{order}', [OrderController::class, 'show']);
 Route::put('orders/{order}', [OrderController::class, 'update']); 
 Route::delete('orders/{order}', [OrderController::class, 'destroy']); 
 
-Route::post('login', [AuthController::class, 'login']);
+Route::post('auth/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);

@@ -13,7 +13,7 @@ class OrderFactory extends Factory
     public function definition()
     {
         return [
-            'user_id'     => User::factory(), 
+            'user_id'     => User::factory(),
             'description' => $this->faker->sentence(),
             'value'       => $this->faker->randomFloat(2, 10, 1000),
             'currency'    => $this->faker->randomElement(['BRL', 'USD']),

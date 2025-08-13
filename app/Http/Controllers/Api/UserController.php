@@ -45,7 +45,7 @@ class UserController extends Controller
      *     )
      * )
      */
-    
+
     public function index()
     {
         try {
@@ -130,8 +130,10 @@ class UserController extends Controller
     public function show($id)
     {
         try {
-            $user = User::select('id','name','email','created_at')->find($id);
-            if (!$user) return response()->json(['error' => 'Usuário não encontrado'], 404);
+            $user = User::select('id', 'name', 'email', 'created_at')->find($id);
+            if (!$user) {
+                return response()->json(['error' => 'Usuário não encontrado'], 404);
+            }
             return response()->json($user);
         } catch (Exception $e) {
             Log::error($e->getMessage());
@@ -167,9 +169,13 @@ class UserController extends Controller
     {
         try {
             $user = User::find($id);
-            if (!$user) return response()->json(['error'=>'Usuário não encontrado'], 404);
+            if (!$user) {
+                return response()->json(['error' => 'Usuário não encontrado'], 404);
+            }
             $data = $request->validated();
-            if(isset($data['password'])) $data['password'] = bcrypt($data['password']);
+            if (isset($data['password'])) {
+                $data['password'] = bcrypt($data['password']);
+            }
             $user->update($data);
             Cache::forget("user:{$id}");
             return response()->json($user);
@@ -199,13 +205,14 @@ class UserController extends Controller
     {
         try {
             $user = User::find($id);
-            if (!$user) return response()->json(['error'=>'Usuário não encontrado'], 404);
+            if (!$user) {
+                return response()->json(['error' => 'Usuário não encontrado'], 404);
+            }
             $user->delete();
-            Cache::forget("user:{$id}");
-            return response()->json(['message'=>'Usuário deletado com sucesso']);
+            return response()->json(['message' => 'Usuário deletado com sucesso']);
         } catch (Exception $e) {
             Log::error($e->getMessage());
-            return response()->json(['error'=>'Erro ao deletar usuário'], 500);
+            return response()->json(['error' => 'Erro ao deletar usuário'], 500);
         }
     }
 }

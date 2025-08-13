@@ -110,14 +110,13 @@ class OrderController extends Controller
     {
         try {
             $data = $request->validated();
-            
-           
+
+
             $data['user_id'] = auth()->id();
 
             $order = Order::create($data);
 
             return response()->json($order, 201);
-
         } catch (Exception $e) {
             return $this->errorResponse('Erro ao criar pedido.', 500, $e);
         }
@@ -157,7 +156,9 @@ class OrderController extends Controller
     {
         try {
             $order = Order::with('user')->find($id);
-            if (!$order) return $this->errorResponse('Pedido não encontrado.', 404);
+            if (!$order) {
+                return $this->errorResponse('Pedido não encontrado.', 404);
+            }
 
             $order->converted_value = $this->currencyConverter->convert(
                 $order->value,
@@ -247,7 +248,7 @@ class OrderController extends Controller
      *     @OA\Response(response=401, description="Não autorizado")
      * )
      */
-    
+
     public function destroy(int $id)
     {
         try {

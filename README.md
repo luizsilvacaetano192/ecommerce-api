@@ -1,50 +1,123 @@
-# API de Gerenciamento de E-commerce
+# 🛒 API de Gerenciamento de E-commerce
 
-Esta é uma API RESTful desenvolvida em PHP 8+ para gerenciar usuários e pedidos em um sistema de e-commerce fictício. A API inclui autenticação por token, integração com serviço de câmbio e operações CRUD completas.
+&#x20;    &#x20;
 
-## Funcionalidades
+API RESTful em **PHP 8+** para gerenciamento de usuários e pedidos, com autenticação JWT, integração de câmbio e suporte completo a CRUD.
 
-- Gerenciamento de usuários (CRUD)
-- Gerenciamento de pedidos (CRUD)
-- Cálculo automático de valores totais
-- Conversão de moedas (BRL ↔ USD) via API externa
-- Autenticação por token JWT
-- Paginação em listagens
-- Validação de dados
+---
 
-## Pré-requisitos
+## ✨ Funcionalidades
 
-- PHP 8.4
-- Composer
-- Postgress 15
-- Docker
-- Documentação da API com Swagger (OpenAPI)
-- Implementando PSR-12 - PHP_CodeSniffer
-- Implementação de Testes com PHPUnit
+* **Usuários:** CRUD completo
+* **Pedidos:** CRUD completo com cálculo automático de valores
+* **Conversão de moedas:** BRL ↔ USD via API externa
+* **Autenticação:** JWT (JSON Web Token)
+* **Paginação:** Para todas as listagens
+* **Validação de dados:** Regras robustas
+* **Documentação:** Swagger/OpenAPI
 
-## Instalação
+---
 
-1. Clone o repositório:
+## 🛠️ Tecnologias
+
+| Tecnologia      | Versão / Observações                |
+| --------------- | ----------------------------------- |
+| PHP             | 8.4                                 |
+| PostgreSQL      | 15                                  |
+| Docker          | Orquestração de containers          |
+| Composer        | Gerenciamento de dependências       |
+| Swagger/OpenAPI | Documentação interativa             |
+| PSR-12          | Padrão de código (PHP\_CodeSniffer) |
+| PHPUnit         | Testes automatizados                |
+| PHPStan         | Análise estática de código          |
+
+---
+
+## 🚀 Instalação
+
 ```bash
 git clone https://github.com/seu-usuario/ecommerce-api.git
 cd ecommerce-api
 
+docker-compose down -v
+docker-compose build
+docker-compose up -d
 
+docker-compose exec app composer install
+docker-compose exec app cp .env.example .env
+docker-compose exec app php artisan key:generate
+docker-compose exec app php artisan migrate
 
-Instale as dependências: composer install
+docker-compose exec app php artisan serve --host=0.0.0.0 --port=8000
+```
 
-Configure o ambiente: cp .env.example .env
+---
 
-Edite o arquivo .env com suas configurações de banco de dados e outras variáveis.
+## 🧪 Testes e Qualidade de Código
 
-php database/migrations.php
+### Testes unitários
 
-Inicie o servidor: php artisan serve
+```bash
+docker-compose run --rm app_test vendor/bin/phpunit tests
+```
 
-Para testar rode: docker-compose run --rm app_test vendor/bin/phpunit tests
+### PSR-12
 
-Para validar o PSR-12: vendor/bin/phpcs \
-    /var/www/html/app/Http/Controllers \
-    /var/www/html/routes \
-    /var/www/html/tests \
-    --standard=phpcs.xml -s
+```bash
+vendor/bin/phpcs /var/www/html/app/Http/Controllers /var/www/html/routes /var/www/html/tests --standard=phpcs.xml -s
+```
+
+### PHPStan (Análise Estática)
+
+```bash
+vendor/bin/phpstan analyse -c phpstan.neon
+```
+
+---
+
+## 📄 Documentação
+
+A documentação interativa está disponível via **Swagger/OpenAPI**:
+`http://localhost:8000/api/documentation`
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   └── Middleware/
+config/
+database/
+tests/
+routes/
+```
+
+---
+
+## ⚡ GitHub Actions (CI/CD)
+
+Arquivo `.github/workflows/ci.yml`:
+
+```yaml
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+      - run: composer install
+      - run: vendor/bin/phpunit --coverage-text
+      - run: vendor/bin/phpcs /var/www/html/app/Http/Controllers /var/www/html/routes /var/www/html/tests --standard=phpcs.xml
+      - run: vendor/bin/phpstan analyse -c phpstan.neon
+```

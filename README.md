@@ -45,6 +45,19 @@ docker-compose up -d
 
 docker-compose exec app composer install
 docker-compose exec app cp .env.example .env
+
+Configura o banco de dados e chave do EXCHANGE_RATE_KEY
+
+# Configurações de Banco de Dados
+DB_CONNECTION=pgsql
+DB_HOST=db
+DB_PORT=5432
+DB_DATABASE=ecommerce
+DB_USERNAME=
+DB_PASSWORD=
+
+EXCHANGE_RATE_KEY=
+
 docker-compose exec app php artisan key:generate
 docker-compose exec app php artisan migrate
 

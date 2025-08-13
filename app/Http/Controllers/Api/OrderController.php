@@ -10,6 +10,7 @@ use App\Services\CurrencyConverterService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -23,15 +24,15 @@ class OrderController extends Controller
     public function index()
     {
         try {
-            $cacheKey = 'orders_page_' . request('page', 1);
+            $cacheKey = 'orders_user_' . auth()->id() . '_page_' . request('page', 1);
 
             $orders = Cache::remember($cacheKey, 60, function () {
-                return Order::with('user')->paginate(10);
+                return Order::where('user_id', auth()->id())
+                    ->paginate(10);
             });
 
-            return response()->json($orders);
-
-        } catch (Exception $e) {
+            return $orders;
+        } catch (\Exception $e) {
             return $this->errorResponse('Erro ao listar pedidos.', 500, $e);
         }
     }
@@ -51,21 +52,26 @@ class OrderController extends Controller
     public function show(int $id)
     {
         try {
-            $order = Cache::remember("order_{$id}", 60, function () use ($id) {
-                return Order::with('user')->findOrFail($id);
-            });
 
-            $order->converted_amount = $this->currencyConverter->convert(
-                $order->amount,
+            $order =  Order::with('user')->find($id);
+           
+            if (!$order) {
+                return $this->errorResponse('Pedido não encontrado.', 404);
+            }
+
+            $order->converted_value = $this->currencyConverter->convert(
+                $order->value,
                 $order->currency
             );
 
-            return response()->json($order);
+            return $order;
 
-        } catch (ModelNotFoundException $e) {
-            return $this->errorResponse('Pedido não encontrado.', 404);
         } catch (Exception $e) {
-            return $this->errorResponse('Erro ao buscar pedido.', 500, $e);
+            Log::error("OrderController show error - ID: {$id}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->errorResponse('Erro ao buscar pedido.', 500);
         }
     }
 

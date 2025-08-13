@@ -7,110 +7,149 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     public function index()
     {
         try {
-            $page = request('page', 1);
-            $cacheKey = "users_page_{$page}";
+           
+            \Log::debug('Attempting to fetch users list');
+            
+            $users = User::select('id', 'name', 'email', 'created_at')
+                ->paginate(10);
 
-            $users = Cache::store('redis')->remember($cacheKey, 60, function () {
-                return User::select('id', 'name', 'email', 'created_at')
-                    ->paginate(10);
-            });
-
+            \Log::debug('Successfully fetched users', ['count' => $users->count()]);
+            
             return response()->json($users);
 
-        } catch (Exception $e) {
-            return $this->errorResponse('Erro ao listar usuários.', 500, $e);
+        } catch (\Exception $e) {
+            \Log::error('UserController index failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'error' => 'Error listing users',
+                'details' => config('app.debug') ? $e->getMessage() : []
+            ], 500);
         }
     }
 
     public function store(StoreUserRequest $request)
     {
         try {
-            $data = $request->validated();
-            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            $validated = $request->validated();
+            
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+            ]);
 
-            $user = User::create($data);
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at
+            ], 201);
 
-            Redis::connection()->flushdb();
-
-            return response()->json($user, 201);
-
-        } catch (ValidationException $e) {
-            return $this->errorResponse('Dados inválidos.', 422, $e->errors());
-        } catch (Exception $e) {
-            return $this->errorResponse('Erro ao criar usuário.', 500, $e);
+        } catch (\Exception $e) {
+            \Log::error('User creation failed: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'User creation failed',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
-    public function show(int $id)
+    public function show($id)
     {
         try {
-            $cacheKey = "user_{$id}";
+            $user = User::select('id', 'name', 'email', 'created_at')
+                    ->find($id); // Use find() instead of findOrFail()
 
-            $user = Cache::store('redis')->remember($cacheKey, 60, function () use ($id) {
-                return User::select('id', 'name', 'email', 'created_at')->findOrFail($id);
-            });
+            if (!$user) {
+                return response()->json([
+                    'error' => 'User not found'
+                ], 404);
+            }
 
             return response()->json($user);
 
-        } catch (ModelNotFoundException $e) {
-            return $this->errorResponse('Usuário não encontrado.', 404);
-        } catch (Exception $e) {
-            return $this->errorResponse('Erro ao buscar usuário.', 500, $e);
+        } catch (\Exception $e) {
+            \Log::error("UserController show error: " . $e->getMessage());
+            return response()->json([
+                'error' => 'Server error'
+            ], 500);
         }
     }
 
     public function update(UpdateUserRequest $request, int $id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::find($id); // Changed from findOrFail to find
+            
+            if (!$user) {
+                return $this->errorResponse('User not found.', 404);
+            }
 
             $data = $request->validated();
 
-            if (!empty($data['password'])) {
-                $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-            } else {
-                unset($data['password']);
+            if (isset($data['password'])) {
+                $data['password'] = bcrypt($data['password']); // Using Laravel's bcrypt
             }
 
             $user->update($data);
+            Cache::forget("user:{$id}");
+            Cache::forget("users:list:*");
 
-            Redis::connection()->flushdb();
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'updated_at' => $user->updated_at
+            ]);
 
-            return response()->json($user);
-
-        } catch (ModelNotFoundException $e) {
-            return $this->errorResponse('Usuário não encontrado.', 404);
         } catch (ValidationException $e) {
-            return $this->errorResponse('Dados inválidos.', 422, $e->errors());
+            return $this->errorResponse('Validation error.', 422, $e->errors());
         } catch (Exception $e) {
-            return $this->errorResponse('Erro ao atualizar usuário.', 500, $e);
+            Log::error("User update failed - ID: {$id}", [
+                'error' => $e->getMessage(),
+                'data' => $request->all()
+            ]);
+            return $this->errorResponse('Error updating user.', 500);
         }
     }
 
     public function destroy(int $id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::find($id); // Changed from findOrFail to find
+            
+            if (!$user) {
+                return $this->errorResponse('User not found.', 404); // Consistent English messages
+            }
+
             $user->delete();
 
-            Redis::connection()->flushdb();
+            Cache::forget("user:{$id}");
+            Cache::forget('users:list:*');
 
-            return response()->json(['message' => 'Usuário excluído com sucesso']);
+            return response()->json([
+                'message' => 'User deleted successfully',
+                'deleted_at' => now()->toDateTimeString()
+            ]);
 
-        } catch (ModelNotFoundException $e) {
-            return $this->errorResponse('Usuário não encontrado.', 404);
         } catch (Exception $e) {
-            return $this->errorResponse('Erro ao excluir usuário.', 500, $e);
+            Log::error("User deletion failed - ID: {$id}", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return $this->errorResponse('Error deleting user.', 500);
         }
     }
 

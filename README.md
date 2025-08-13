@@ -77,7 +77,7 @@ docker-compose run --rm app_test vendor/bin/phpunit tests
 ### PSR-12
 
 ```bash
-vendor/bin/phpcs /var/www/html/app/Http/Controllers /var/www/html/routes /var/www/html/tests --standard=phpcs.xml -s
+docker-compose exec app vendor/bin/phpcs /var/www/html/app/Http/Controllers /var/www/html/routes /var/www/html/tests --standard=phpcs.xml -s
 ```
 
 ### PHPStan (Análise Estática)

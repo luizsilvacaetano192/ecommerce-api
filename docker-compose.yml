@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -11,9 +9,8 @@ services:
       - "8000:8000"
     volumes:
       - ./:/var/www/html
-    depends_on:
-      - db
-      - redis
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /var/www/html
     environment:
       - DB_HOST=db
       - DB_PORT=5432
@@ -22,6 +19,9 @@ services:
       - DB_PASSWORD=laravelpass
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    depends_on:
+      - db
+      - redis
 
   db:
     image: postgres:15

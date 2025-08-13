@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\UserController;
 
 Route::get('/teste', function () {
     return response()->json([
@@ -12,6 +13,9 @@ Route::get('/teste', function () {
 });
 
 Route::apiResource('orders', OrderController::class);
+Route::apiResource('users', UserController::class);
+
+
 
 Route::get('/status', function () {
     return response()->json([

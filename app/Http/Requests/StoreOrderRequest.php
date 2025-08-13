@@ -16,7 +16,6 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id'     => 'required|exists:users,id',
             'description' => 'required|string|max:255',
             'value'       => 'required|numeric|min:0.01',
             'currency'    => 'required|in:BRL,USD',
@@ -26,9 +25,6 @@ class StoreOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'user_id.required' => 'O campo usuário é obrigatório.',
-            'user_id.exists'   => 'O usuário informado não existe.',
-
             'description.required' => 'O campo descrição é obrigatório.',
             'description.string'   => 'O campo descrição deve ser uma string.',
             'description.max'      => 'O campo descrição deve ter no máximo 255 caracteres.',

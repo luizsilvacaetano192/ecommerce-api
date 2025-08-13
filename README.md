@@ -14,7 +14,7 @@ API RESTful em **PHP 8+** para gerenciamento de usuários e pedidos, com autenti
 * **Autenticação:** JWT (JSON Web Token)
 * **Paginação:** Para todas as listagens
 * **Validação de dados:** Regras robustas
-* **Documentação:** Swagger/OpenAPI - http://127.0.0.1:8000/api/documentation
+* **Documentação:** Swagger/OpenAPI
 
 ---
 

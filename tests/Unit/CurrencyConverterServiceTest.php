@@ -21,7 +21,7 @@ class CurrencyConverterServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_it_converts_currency_using_cached_rate()
+    public function testItConvertsCurrencyUsingCachedRate()
     {
         Cache::shouldReceive('remember')
             ->once()
@@ -34,7 +34,7 @@ class CurrencyConverterServiceTest extends TestCase
         $this->assertEquals(20.0, $result['converted_amount']);
     }
 
-    public function test_it_fetches_rate_from_api_when_not_cached()
+    public function testItFetchesRateFromApiWhenNotCached()
     {
         Http::fake([
             '*/pair/BRL/USD' => Http::response([
@@ -53,7 +53,7 @@ class CurrencyConverterServiceTest extends TestCase
         Http::assertSentCount(1);
     }
 
-    public function test_it_returns_1_rate_if_api_fails()
+    public function testItReturns1RateIfApiFails()
     {
         Http::fake([
             '*/pair/BRL/USD' => Http::response([], 500)

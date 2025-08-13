@@ -14,20 +14,20 @@ class UserControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         Cache::shouldReceive('remember')
             ->andReturnUsing(function ($key, $ttl, $callback) {
                 return $callback();
             });
-            
+
         Cache::shouldReceive('forget')
             ->andReturn(true);
-            
+
         Cache::shouldReceive('flush')
             ->andReturn(true);
     }
 
-    public function test_index_returns_paginated_users_with_authentication()
+    public function testIndexReturnsPaginatedUsersWithAuthentication()
     {
         $user = User::factory()->create();
         /** @var \App\Models\User $user */
@@ -36,11 +36,11 @@ class UserControllerTest extends TestCase
         User::factory()->count(15)->create();
 
         $response = $this->getJson('/api/users');
-        
+
         if ($response->status() === 500) {
             dd($response->json());
         }
-        
+
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
@@ -50,13 +50,13 @@ class UserControllerTest extends TestCase
             ]);
     }
 
-    public function test_store_creates_user()
+    public function testStoreCreatesUser()
     {
         $payload = [
             'name' => 'New User',
             'email' => 'new@example.com',
             'password' => 'password123',
-            'password_confirmation' => 'password123' 
+            'password_confirmation' => 'password123'
         ];
 
         $response = $this->postJson('/api/users', $payload);
@@ -71,40 +71,40 @@ class UserControllerTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'new@example.com']);
     }
 
-  public function test_show_returns_user()
-{
-    $user = User::factory()->create();
-    
-    $response = $this->getJson("/api/users/{$user->id}");
-    
-    // Debug if test fails
-    if ($response->status() !== 200) {
-        dump($response->json());
-    }
-    
-    $response->assertStatus(200)
-        ->assertJsonFragment([
-            'id' => $user->id,
-            'email' => $user->email
-        ]);
-}
+    public function testShowReturnsUser()
+    {
+        $user = User::factory()->create();
 
-public function test_show_returns_404_if_not_found()
-{
-    $response = $this->getJson('/api/users/999999');
-    
-    // Debug if test fails
-    if ($response->status() !== 404) {
-        dump($response->json());
-    }
-    
-    $response->assertStatus(404)
-        ->assertJson([
-            'error' => 'User not found'
-        ]);
-}
+        $response = $this->getJson("/api/users/{$user->id}");
 
-    public function test_update_modifies_user()
+        // Debug if test fails
+        if ($response->status() !== 200) {
+            dump($response->json());
+        }
+
+        $response->assertStatus(200)
+            ->assertJsonFragment([
+                'id' => $user->id,
+                'email' => $user->email
+            ]);
+    }
+
+    public function testShowReturns404IfNotFound()
+    {
+        $response = $this->getJson('/api/users/999999');
+
+        // Debug if test fails
+        if ($response->status() !== 404) {
+            dump($response->json());
+        }
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'error' => 'Usuário não encontrado'
+            ]);
+    }
+
+    public function testUpdateModifiesUser()
     {
         $user = User::factory()->create();
 
@@ -126,7 +126,7 @@ public function test_show_returns_404_if_not_found()
         $this->assertDatabaseHas('users', ['name' => 'Updated Name']);
     }
 
-    public function test_update_returns_404_if_not_found()
+    public function testUpdateReturns404IfNotFound()
     {
         $payload = [
             'name' => 'Any Name',
@@ -138,26 +138,26 @@ public function test_show_returns_404_if_not_found()
         $response = $this->putJson('/api/users/999', $payload);
 
         $response->assertStatus(404)
-            ->assertJsonFragment(['error' => 'User not found.']);
+            ->assertJsonFragment(['error' => 'Usuário não encontrado']);
     }
 
-    public function test_destroy_deletes_user()
+    public function testDestroyDeletesUser()
     {
         $user = User::factory()->create();
 
         $response = $this->deleteJson("/api/users/{$user->id}");
 
         $response->assertStatus(200)
-            ->assertJsonFragment(['message' => 'User deleted successfully']);
+            ->assertJsonFragment(['message' => 'Usuário deletado com sucesso']);
 
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
     }
 
-    public function test_destroy_returns_404_if_not_found()
+    public function testDestroyReturns404IfNotFound()
     {
         $response = $this->deleteJson('/api/users/999');
 
         $response->assertStatus(404)
-            ->assertJsonFragment(['error' => 'User not found.']);
+            ->assertJsonFragment(['error' => 'Usuário não encontrado']);
     }
 }

@@ -48,7 +48,7 @@ class AuthController extends Controller
     {
         try {
             Log::info('Login attempt', ['email' => $request->email]);
-            
+
             $user = User::where('email', $request->email)->first();
 
             if (!$user || !Hash::check($request->password, $user->password)) {
@@ -57,7 +57,7 @@ class AuthController extends Controller
             }
 
             $token = $user->createToken('api-token')->plainTextToken;
-            
+
             Log::info('User logged in successfully', [
                 'user_id' => $user->id,
                 'ip' => $request->ip()
@@ -68,7 +68,6 @@ class AuthController extends Controller
                 'token_type' => 'Bearer',
                 'user' => $user,
             ]);
-            
         } catch (Exception $e) {
             Log::error('Login failed', [
                 'error' => $e->getMessage(),
@@ -93,16 +92,15 @@ class AuthController extends Controller
         try {
             $user = $request->user();
             $tokenId = $user->currentAccessToken()->id;
-            
+
             $user->currentAccessToken()->delete();
-            
+
             Log::info('User logged out', [
                 'user_id' => $user->id,
                 'token_id' => $tokenId
             ]);
 
             return response()->json(['message' => 'Logout realizado com sucesso.']);
-            
         } catch (Exception $e) {
             Log::error('Logout failed', [
                 'user_id' => $request->user()->id ?? null,
@@ -136,9 +134,8 @@ class AuthController extends Controller
             Log::debug('User data requested', [
                 'user_id' => $request->user()->id
             ]);
-            
+
             return response()->json($request->user());
-            
         } catch (Exception $e) {
             Log::error('Failed to fetch user data', [
                 'error' => $e->getMessage(),

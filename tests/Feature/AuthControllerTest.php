@@ -11,7 +11,7 @@ class AuthControllerTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public function test_login_returns_token_with_valid_credentials(): void
+    public function testLoginReturnsTokenWithValidCredentials(): void
     {
         $password = 'senha123';
         $user = User::factory()->create([
@@ -33,7 +33,7 @@ class AuthControllerTest extends TestCase
                  ]);
     }
 
-    public function test_login_fails_with_invalid_credentials(): void
+    public function testLoginFailsWithInvalidCredentials(): void
     {
         $user = User::factory()->create([
             'password' => Hash::make('senha123'),
@@ -50,11 +50,10 @@ class AuthControllerTest extends TestCase
                  ->assertJson(['error' => 'Credenciais inválidas.']);
     }
 
-    public function test_me_returns_authenticated_user(): void
+    public function testMeReturnsAuthenticatedUser(): void
     {
         $user = User::factory()->create();
-        
-        /** @var \App\Models\User $user */
+
         $response = $this->actingAs($user, 'sanctum')
                          ->getJson('/api/me');
 
@@ -65,13 +64,13 @@ class AuthControllerTest extends TestCase
                  ]);
     }
 
-    public function test_logout_revokes_token(): void
+    public function testLogoutRevokesToken(): void
     {
         $user = User::factory()->create();
 
         $token = $user->createToken('test-token')->plainTextToken;
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
                          ->postJson('/api/logout');
 
         $response->assertOk()

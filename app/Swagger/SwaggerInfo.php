@@ -5,13 +5,14 @@ namespace App\Swagger;
 /**
  * @OA\Info(
  *     version="1.0.0",
- *     title="API Documentation",
+ *     title="API Documentation - Teste PHP",
  *     description="Documentação da API",
  *     @OA\Contact(
- *         email="seuemail@exemplo.com"
+ *         email="luizsilvacaetano192@gmail.com"
  *     )
  * )
  */
+
 class SwaggerInfo
 {
 }

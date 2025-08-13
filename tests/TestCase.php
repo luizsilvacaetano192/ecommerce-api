@@ -4,7 +4,7 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\Artisan;
-use Tests\CreatesApplication; 
+use Tests\CreatesApplication;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -15,11 +15,10 @@ abstract class TestCase extends BaseTestCase
      */
     protected function setUp(): void
     {
-       
+
         parent::setUp();
-        
+
         if (env('APP_ENV') === 'testing') {
-            
             $this->configureDatabaseForTesting();
         }
     }
@@ -48,7 +47,7 @@ abstract class TestCase extends BaseTestCase
         if (env('APP_ENV') === 'testing') {
             Artisan::call('migrate:reset');
         }
-        
+
         parent::tearDown();
     }
 }

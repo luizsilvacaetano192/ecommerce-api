@@ -14,8 +14,6 @@ class OrderControllerTest extends TestCase
 
     protected $currencyConverterMock;
 
-    
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -24,7 +22,7 @@ class OrderControllerTest extends TestCase
         $this->app->instance(\App\Services\CurrencyConverterService::class, $this->currencyConverterMock);
     }
 
-    public function test_index_returns_paginated_orders()
+    public function testIndexReturnsPaginatedOrders()
     {
         $user = User::factory()->create();
         /** @var \App\Models\User $user */
@@ -48,7 +46,7 @@ class OrderControllerTest extends TestCase
                  ]);
     }
 
-    public function test_store_creates_order()
+    public function testStoreCreatesOrder()
     {
         $user = User::factory()->create();
         /** @var \App\Models\User $user */
@@ -69,7 +67,7 @@ class OrderControllerTest extends TestCase
         $this->assertDatabaseHas('orders', ['user_id' => $user->id, 'value' => 100]);
     }
 
-    public function test_show_returns_order_with_converted_value()
+    public function testShowReturnsOrderWithConvertedValue()
     {
         $user = User::factory()->create();
         $order = Order::factory()->create([
@@ -95,7 +93,7 @@ class OrderControllerTest extends TestCase
                  ]);
     }
 
-    public function test_show_returns_404_if_not_found()
+    public function testShowReturns404IfNotFound()
     {
         $user = User::factory()->create();
         /** @var \App\Models\User $user */
@@ -107,7 +105,7 @@ class OrderControllerTest extends TestCase
                  ->assertJsonFragment(['error' => 'Pedido não encontrado.']);
     }
 
-    public function test_update_modifies_order()
+    public function testUpdateModifiesOrder()
     {
         $user = User::factory()->create();
         $order = Order::factory()->create([
@@ -129,12 +127,12 @@ class OrderControllerTest extends TestCase
         $response = $this->putJson("/api/orders/{$order->id}", $payload);
 
         $response->assertStatus(200)
-                ->assertJsonFragment(['value' => 150, 'currency' => 'USD']);
+                 ->assertJsonFragment(['value' => 150, 'currency' => 'USD']);
 
         $this->assertDatabaseHas('orders', ['id' => $order->id, 'value' => 150, 'currency' => 'USD']);
     }
 
-    public function test_update_returns_404_if_not_found()
+    public function testUpdateReturns404IfNotFound()
     {
         $user = User::factory()->create();
         /** @var \App\Models\User $user */
@@ -148,7 +146,7 @@ class OrderControllerTest extends TestCase
                  ->assertJsonFragment(['error' => 'Pedido não encontrado.']);
     }
 
-    public function test_destroy_deletes_order()
+    public function testDestroyDeletesOrder()
     {
         $user = User::factory()->create();
         $order = Order::factory()->create([
@@ -168,7 +166,7 @@ class OrderControllerTest extends TestCase
         $this->assertSoftDeleted('orders', ['id' => $order->id]);
     }
 
-    public function test_destroy_returns_404_if_not_found()
+    public function testDestroyReturns404IfNotFound()
     {
         $user = User::factory()->create();
         /** @var \App\Models\User $user */

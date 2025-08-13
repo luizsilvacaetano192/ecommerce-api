@@ -94,30 +94,3 @@ database/
 tests/
 routes/
 ```
-
----
-
-## ⚡ GitHub Actions (CI/CD)
-
-Arquivo `.github/workflows/ci.yml`:
-
-```yaml
-name: CI Pipeline
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-      - run: composer install
-      - run: vendor/bin/phpunit --coverage-text
-      - run: vendor/bin/phpcs /var/www/html/app/Http/Controllers /var/www/html/routes /var/www/html/tests --standard=phpcs.xml
-      - run: vendor/bin/phpstan analyse -c phpstan.neon
-```

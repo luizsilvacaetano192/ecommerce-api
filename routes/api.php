@@ -13,12 +13,24 @@ Route::get('/teste', function () {
     ]);
 });
 
-Route::apiResource('orders', OrderController::class);
-Route::apiResource('users', UserController::class);
+Route::post('users', [UserController::class, 'store']); 
+Route::get('users/{user}', [UserController::class, 'show']); 
+Route::put('users/{user}', [UserController::class, 'update']); 
+Route::delete('users/{user}', [UserController::class, 'destroy']);
+
+Route::get('orders/{order}', [OrderController::class, 'show']);  
+Route::put('orders/{order}', [OrderController::class, 'update']); 
+Route::delete('orders/{order}', [OrderController::class, 'destroy']); 
+
 Route::post('login', [AuthController::class, 'login']);
 
-
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me']);
+    Route::get('users', [UserController::class, 'index']);
+    Route::get('orders', [OrderController::class, 'index']); 
+    Route::post('orders', [OrderController::class, 'store']);  
+});
 
 Route::get('/status', function () {
     return response()->json([

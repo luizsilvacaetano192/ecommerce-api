@@ -1,0 +1,72 @@
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/var/www/html
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /var/www/html
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE:-ecommerce}
+      DB_USERNAME: ${DB_USERNAME:-laraveluser}
+      DB_PASSWORD: ${DB_PASSWORD:-laravelpass}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  app_test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-app-test
+    working_dir: /var/www/html
+    environment:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: ":memory:"
+      CACHE_DRIVER: array
+      QUEUE_CONNECTION: sync
+      SESSION_DRIVER: array
+    volumes:
+      - ./:/var/www/html
+    command: ["php", "artisan", "test"]
+
+  db:
+    image: postgres:15
+    container_name: ecommerce-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-laraveluser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-laravelpass}
+      POSTGRES_DB: ${DB_DATABASE:-ecommerce}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-laraveluser} -d ${DB_DATABASE:-ecommerce}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: ecommerce-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:

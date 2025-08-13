@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AuthController;
 
-Route::get('/teste', function () {
+Route::get('/', function () {
     return response()->json([
         'status' => 'OK',
         'message' => 'API está funcionando corretamente',

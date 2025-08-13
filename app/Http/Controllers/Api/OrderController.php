@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Order;
 use App\Services\CurrencyConverterService;
 use Illuminate\Support\Facades\Cache;
@@ -49,7 +50,7 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    public function update(StoreOrderRequest $request, int $id)
+    public function update(UpdateOrderRequest $request, int $id)
     {
         $order = Order::findOrFail($id);
         $order->update($request->validated());

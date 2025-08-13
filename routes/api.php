@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\AuthController;
 
 Route::get('/teste', function () {
     return response()->json([
@@ -14,6 +15,8 @@ Route::get('/teste', function () {
 
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('users', UserController::class);
+Route::post('login', [AuthController::class, 'login']);
+
 
 
 
